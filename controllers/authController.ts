@@ -1,5 +1,5 @@
 import {Request, Response} from 'express';
-import { registerUser, authenticateUser } from '../services/userService';
+import { registerUser, authenticateUser } from '../services/userService.js';
 import {userNamePassword} from '../models/types.js';
 import { error } from 'console';
 
