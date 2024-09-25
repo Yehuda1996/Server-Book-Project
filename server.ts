@@ -1,5 +1,6 @@
 import express, { Application } from 'express';
 import authRouter from './routes/auth.js';
+import bookRouter from './routes/book.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -11,6 +12,7 @@ const app: Application = express();
 app.use(express.json());
 
 app.use('/', authRouter);
+app.use('/', bookRouter);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

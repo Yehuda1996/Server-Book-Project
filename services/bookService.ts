@@ -4,7 +4,7 @@ import { readFromJsonFile, writeUserToJsonFile } from '../DAL/jsonUsers.js';
 import axios from 'axios';
 
 
-export const getAllBooks = async (userId: string): Promise<Book[]> => {
+export const getAllBooks = async (userId: string | undefined): Promise<Book[]> => {
     const users = await readFromJsonFile();
     const user = users.find(u => u.id === userId);
     if(!user){

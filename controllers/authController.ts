@@ -7,7 +7,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     try{
         const {userName, password} : userNamePassword = req.body;
         if(!userName || !password){
-            res.status(400).json({error: "Username and passwoed are required."});
+            res.status(400).json({error: "Username and password are required."});
             return;
         }
         const userId = await registerUser(userName, password);
@@ -27,7 +27,7 @@ export const login = async (req:Request, res: Response): Promise<void> => {
     try{
         const {userName, password}: userNamePassword = req.body;
         if(!userName || !password){
-            res.status(400).json({error: "Username and passwoed are required."});
+            res.status(400).json({error: "Username and password are required."});
             return;
         }
         const userId = await authenticateUser(userName, password);

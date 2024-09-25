@@ -12,7 +12,7 @@ export const register = (req, res) => __awaiter(void 0, void 0, void 0, function
     try {
         const { userName, password } = req.body;
         if (!userName || !password) {
-            res.status(400).json({ error: "Username and passwoed are required." });
+            res.status(400).json({ error: "Username and password are required." });
             return;
         }
         const userId = yield registerUser(userName, password);
@@ -32,7 +32,7 @@ export const login = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     try {
         const { userName, password } = req.body;
         if (!userName || !password) {
-            res.status(400).json({ error: "Username and passwoed are required." });
+            res.status(400).json({ error: "Username and password are required." });
             return;
         }
         const userId = yield authenticateUser(userName, password);
