@@ -7,41 +7,44 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { v4 as uuidv4 } from 'uuid';
-import { readFromJsonFile, writeUserToJsonFile } from '../DAL/jsonUsers.js';
-import bcrypt from 'bcrypt';
+import { registerUser, authenticateUser } from '../services/userService';
 export const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = req.body;
-        user.id = uuidv4();
-        user.password = bcrypt.hashSync(user.password, 10);
-        yield writeUserToJsonFile(user);
-        res.status(201).json({ userid: user.id });
+        const { userName, password } = req.body;
+        if (!userName || !password) {
+            res.status(400).json({ error: "Username and passwoed are required." });
+            return;
+        }
+        const userId = yield registerUser(userName, password);
+        res.status(201).json({ useid: userId });
     }
     catch (error) {
-        res.status(500).send(error);
+        if (error.message === "Username already exists.") {
+            res.status(409).json({ error: error.message });
+        }
+        else {
+            console.error("Error registering user:", error);
+            res.status(500).json({ error: "Internal server error." });
+        }
     }
 });
 export const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = req.body;
-        const users = yield readFromJsonFile();
-        const userFind = users.find((u) => {
-            return u.userName === user.userName;
-        });
-        if (userFind) {
-            if (bcrypt.compareSync(user.password, userFind === null || userFind === void 0 ? void 0 : userFind.password)) {
-                res.status(200).json({ userid: userFind.id });
-            }
-            else {
-                throw new Error("Incorrect password");
-            }
+        const { userName, password } = req.body;
+        if (!userName || !password) {
+            res.status(400).json({ error: "Username and passwoed are required." });
+            return;
         }
-        else {
-            throw new Error("Incorrect password");
-        }
+        const userId = yield authenticateUser(userName, password);
+        res.status(200).json({ userid: userId });
     }
     catch (error) {
-        res.status(500).json(error);
+        if (error.message === "Invalid username or password.") {
+            res.status(401).json({ error: error.message });
+        }
+        else {
+            console.error("Error during login:", error);
+            res.status(500).json({ error: "Internal server error." });
+        }
     }
 });

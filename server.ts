@@ -1,8 +1,8 @@
 import express, { Application } from 'express';
 import authRouter from './routes/auth.js';
-import dotenv from 'dotenv'
+//import dotenv from 'dotenv';
 
-dotenv.config();
+//dotenv.config();
 
 const PORT: number | string = process.env.Port || 4000;
 
