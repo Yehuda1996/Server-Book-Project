@@ -21,7 +21,7 @@ export const registerUser = async (userName: string,password: string): Promise<s
       password: hashedPassword,
       books: [],
     };
-  
+    users.push(newUser);
     await writeUserToJsonFile(newUser);
     return newUserId;
   };
