@@ -1,4 +1,6 @@
-export interface User extends userNamePassword {
+export interface User {
+    userName: string,
+    password: string,
     id?: string,
     books?: Book[]
 }

@@ -1,59 +1,61 @@
-import { Request, Response } from "express";
-import { getAllBooks, addBook, updateBook, deleteBook } from "../services/bookService.js";
+import { Request, Response, NextFunction } from "express";
+import { getAllBooks, getBookById, createBook, updateBook, deleteBook } from "../services/bookService.js";
 import { User, Book, userNamePassword } from "../models/types.js";
 
-export const getBooks = async (req: Request, res: Response) => {
+export const getBooks = async (req: Request, res: Response, next: NextFunction) => {
     try{
-        const {id}: User = req.body;
-        if(!id){
-            res.status(400).json("Id required.");
-        }
-        const userBooks = await getAllBooks(id); 
-        res.status(200).json({userBook: userBooks})
+        const books = await getAllBooks();
+        res.json(books);
     }
     catch(error){
-        res.status(500).json({message: error});
+        next(error);
     }
 };
 
-export const add = async (req: Request, res: Response) => {
+export const getBook = async (req: Request, res: Response, next: NextFunction) => {
     try{
-        const {id, title} = req.body;
-        if(!id || !title){
-            res.status(400).json("Id and title required");
+        const book = await getBookById(Number(req.params.id));
+        if(book){
+            res.json(book);
         }
-        const newBook = await addBook(id, title);
-        res.status(201).json(newBook);
+        else{
+            res.status(404).json({message: "Book not found"});
+        }
     }
     catch(error){
-        res.status(500).json({message: error});
+        next(error);
     }
-}
+};
 
-export const update = async (req: Request, res: Response) => {
+export const addBook = async (req: Request, res: Response, next: NextFunction) => {
     try{
-        const {id, title} = req.body;
-        if(!id || !title){
-            res.status(400).json("Id and title required");
-        }
-        const updatedBook = await updateBook(id, title, title);
-        res.status(204).json(updatedBook);
+        const book: any = req.body;
+        await createBook(book);
+        res.status(201).json(book);
     }
     catch(error){
-        res.status(404).json({message: error});
+        next(error);
     }
-}
+};
 
-export const delBook = async (req: Request, res: Response) => {
+export const updateBookById = async (req: Request, res: Response, next: NextFunction) => {
     try{
-        const {id, title} = req.body;
-        if(!id || !title){
-            res.status(400).json("Id and title required");
-        }
-        const deletededBook = await deleteBook(id, title);
-        res.status(200).json(deletededBook);
+         const book: any = req.body;
+         book.id = Number(req.params.id);
+         await updateBook(book);
+         res.json(book);
     }
     catch(error){
-        res.status(404).json({message: error});
+        next(error);
+    }
+};
+
+export const deleteBookById = async (req: Request, res: Response, next: NextFunction) => {
+    try{
+        await deleteBook(Number(req.params.id));
+        res.status(204).end();
+    }
+    catch(error){
+        next(error);
     }
 }

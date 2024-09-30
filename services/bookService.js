@@ -7,69 +7,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { v4 as uuidv4 } from 'uuid';
-import { readFromJsonFile, writeUserToJsonFile } from '../DAL/jsonUsers.js';
-import axios from 'axios';
-export const getAllBooks = (userId) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const users = yield readFromJsonFile();
-    const user = users.find(u => u.id === userId);
-    if (!user) {
-        throw new Error("User Id does not exist");
-    }
-    return (_a = user.books) !== null && _a !== void 0 ? _a : [];
+import { getBooksFromJsonFile, saveBooksToJsonFile } from '../DAL/jsonBooks.js';
+export const getAllBooks = () => __awaiter(void 0, void 0, void 0, function* () {
+    return getBooksFromJsonFile();
 });
-export const addBook = (userId, bookName) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield readFromJsonFile();
-    const user = users.find(u => u.id === userId);
-    if (!user) {
-        throw new Error("User Id does not exist");
-    }
-    const bookInfo = yield getBookInfoFromAPI(bookName);
-    if (!bookInfo) {
-        throw new Error("Book information not found");
-    }
-    const newBook = Object.assign({ id: uuidv4() }, bookInfo);
-    user.books = user.books ? [...user.books, newBook] : [newBook];
-    yield writeUserToJsonFile(user);
-    return newBook;
+export const getBookById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const books = yield getBooksFromJsonFile();
+    return books.find(b => typeof b.id === 'number' && b.id === id);
 });
-const getBookInfoFromAPI = (bookName) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const response = yield axios.get(`https://freetestapi.com/api/v1/books?search=[${bookName}]`);
-        return response.data;
-    }
-    catch (error) {
-        console.error("Error fetching book info:", error);
-        return null;
-    }
+export const createBook = (book) => __awaiter(void 0, void 0, void 0, function* () {
+    const books = yield getBooksFromJsonFile();
+    books.push(book);
+    yield saveBooksToJsonFile(books);
 });
-export const updateBook = (userId, bookId, updatedData) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const users = yield readFromJsonFile();
-    const user = users.find(u => u.id === userId);
-    if (!user) {
-        throw new Error("User Id does not exist");
-    }
-    const bookIndex = (_a = user.books) === null || _a === void 0 ? void 0 : _a.findIndex(b => b.id === bookId);
-    if (bookIndex === undefined || bookIndex === -1) {
-        throw new Error("Book ID not found.");
-    }
-    const updatedBook = Object.assign(Object.assign({}, user.books[bookIndex]), updatedData);
-    user.books[bookIndex] = updatedBook;
-    return updatedBook;
+export const updateBook = (updatdeBook) => __awaiter(void 0, void 0, void 0, function* () {
+    let books = yield getBooksFromJsonFile();
+    books = books.map(book => (book.id === updatdeBook.id ? updatdeBook : book));
+    yield saveBooksToJsonFile(books);
 });
-export const deleteBook = (userId, bookId) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const users = yield readFromJsonFile();
-    const user = users.find(u => u.id === userId);
-    if (!user) {
-        throw new Error("User Id does not exist");
-    }
-    const bookIndex = (_a = user.books) === null || _a === void 0 ? void 0 : _a.findIndex(b => b.id === bookId);
-    if (bookIndex === undefined || bookIndex === -1) {
-        throw new Error("Book ID not found.");
-    }
-    user.books.splice(bookIndex, 1);
-    yield writeUserToJsonFile(user);
+export const deleteBook = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    let books = yield getBooksFromJsonFile();
+    books = books.filter(b => typeof b.id === 'number' && b.id !== id);
+    yield saveBooksToJsonFile(books);
 });

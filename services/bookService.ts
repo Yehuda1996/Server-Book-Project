@@ -1,80 +1,33 @@
 import { Book, User } from '../models/types.js';
 import {v4 as uuidv4} from 'uuid';
+import { getBooksFromJsonFile, saveBooksToJsonFile } from '../DAL/jsonBooks.js';
 import { readFromJsonFile, writeUserToJsonFile } from '../DAL/jsonUsers.js';
 import axios from 'axios';
 
 
-export const getAllBooks = async (userId: string | undefined): Promise<Book[]> => {
-    const users = await readFromJsonFile();
-    const user = users.find(u => u.id === userId);
-    if(!user){
-        throw new Error("User Id does not exist");
-    }
-    return user.books ?? [];
-}
+export const getAllBooks = async (): Promise<Book[]> => {
+    return getBooksFromJsonFile()
+};
 
-export const addBook = async (userId: string, bookName: string): Promise<Book> => {
-    const users = await readFromJsonFile();
-    const user = users.find(u => u.id === userId);
-    if(!user){
-        throw new Error("User Id does not exist");
-    }
+export const getBookById = async (id: number): Promise<Book | undefined> => {
+    const books = await getBooksFromJsonFile();
+    return books.find(b => typeof b.id === 'number' && b.id === id);
+};
 
-    const bookInfo = await getBookInfoFromAPI(bookName);
-    if(!bookInfo){
-        throw new Error("Book information not found");
-    }     
-    const newBook: Book = {
-        id: uuidv4(),
-        ...bookInfo
-    };
+export const createBook = async (book: Book): Promise<void> => {
+    const books = await getBooksFromJsonFile();
+    books.push(book);
+    await saveBooksToJsonFile(books);
+};
 
-    user.books = user.books ? [...user.books, newBook] : [newBook];
+export const updateBook = async (updatdeBook: Book): Promise<void> => {
+    let books = await getBooksFromJsonFile();
+    books = books.map(book => (book.id === updatdeBook.id ? updatdeBook : book));
+    await saveBooksToJsonFile(books);
+};
 
-    await writeUserToJsonFile(user);
-    return newBook;
-}
-
-const getBookInfoFromAPI = async(bookName: string) => {
-    try{
-        const response = await axios.get(`https://freetestapi.com/api/v1/books?search=[${bookName}]`);
-        return response.data
-    }
-    catch(error){
-        console.error("Error fetching book info:", error);
-        return null;
-    }
-}
-
-export const updateBook = async (userId: string, bookId: string, updatedData: Partial<Book>): Promise<Book> => {
-    const users = await readFromJsonFile();
-    const user = users.find(u => u.id === userId);
-    if(!user){
-        throw new Error("User Id does not exist");
-    }
-
-    const bookIndex = user.books?.findIndex(b => b.id === bookId);
-    if(bookIndex === undefined || bookIndex === -1){
-        throw new Error("Book ID not found.")
-    }
-    const updatedBook = {...user.books![bookIndex], ...updatedData};
-    user.books![bookIndex] = updatedBook;
-    return updatedBook;
-}
-
-export const deleteBook = async (userId: string, bookId: string) => {
-    const users = await readFromJsonFile();
-    const user = users.find(u => u.id === userId);
-    if(!user){
-        throw new Error("User Id does not exist");
-    }
-
-    const bookIndex = user.books?.findIndex(b => b.id === bookId);
-    if(bookIndex === undefined || bookIndex === -1){
-        throw new Error("Book ID not found.")
-    }
-
-    user.books!.splice(bookIndex, 1);
-
-    await writeUserToJsonFile(user);
+export const deleteBook = async (id: number): Promise<void> => {
+    let books = await getBooksFromJsonFile();
+    books = books.filter(b => typeof b.id === 'number' && b.id !== id);
+    await saveBooksToJsonFile(books);
 }

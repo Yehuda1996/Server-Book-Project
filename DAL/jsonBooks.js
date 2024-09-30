@@ -8,16 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import jsonfile from 'jsonfile';
-const DB_FILE_PATH = process.env.DB_FILE_PATH || './data/users.json';
-export const writeUserToJsonFile = (user) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield jsonfile.readFile(DB_FILE_PATH);
-    users.push(user);
-    yield jsonfile.writeFile(DB_FILE_PATH, users);
+const file = './books.json';
+export const getBooksFromJsonFile = () => __awaiter(void 0, void 0, void 0, function* () {
+    return jsonfile.readFile(file);
 });
-export const readFromJsonFile = () => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield jsonfile.readFile(DB_FILE_PATH);
-    return users;
+export const saveBooksToJsonFile = (books) => __awaiter(void 0, void 0, void 0, function* () {
+    yield jsonfile.writeFile(file, books, { spaces: 2 });
 });
-// export const writeBookToJsonFile = async (books: Book[]): Promise<void> => {
-//     await jsonfile.writeFile(DB_FILE_PATH, JSON.stringify(books, null, 2), 'utf-8');
-// }

@@ -7,56 +7,57 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { getAllBooks, addBook, updateBook, deleteBook } from "../services/bookService.js";
-export const getBooks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+import { getAllBooks, getBookById, createBook, updateBook, deleteBook } from "../services/bookService.js";
+export const getBooks = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { id } = req.body;
-        if (!id) {
-            res.status(400).json("Id required.");
-        }
-        const userBooks = yield getAllBooks(id);
-        res.status(200).json({ userBook: userBooks });
+        const books = yield getAllBooks();
+        res.json(books);
     }
     catch (error) {
-        res.status(500).json({ message: error });
+        next(error);
     }
 });
-export const add = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+export const getBook = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { id, title } = req.body;
-        if (!id || !title) {
-            res.status(400).json("Id and title required");
+        const book = yield getBookById(Number(req.params.id));
+        if (book) {
+            res.json(book);
         }
-        const newBook = yield addBook(id, title);
-        res.status(201).json(newBook);
+        else {
+            res.status(404).json({ message: "Book not found" });
+        }
     }
     catch (error) {
-        res.status(500).json({ message: error });
+        next(error);
     }
 });
-export const update = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+export const addBook = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { id, title } = req.body;
-        if (!id || !title) {
-            res.status(400).json("Id and title required");
-        }
-        const updatedBook = yield updateBook(id, title, title);
-        res.status(204).json(updatedBook);
+        const book = req.body;
+        yield createBook(book);
+        res.status(201).json(book);
     }
     catch (error) {
-        res.status(404).json({ message: error });
+        next(error);
     }
 });
-export const delBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+export const updateBookById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { id, title } = req.body;
-        if (!id || !title) {
-            res.status(400).json("Id and title required");
-        }
-        const deletededBook = yield deleteBook(id, title);
-        res.status(200).json(deletededBook);
+        const book = req.body;
+        book.id = Number(req.params.id);
+        yield updateBook(book);
+        res.json(book);
     }
     catch (error) {
-        res.status(404).json({ message: error });
+        next(error);
+    }
+});
+export const deleteBookById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield deleteBook(Number(req.params.id));
+        res.status(204).end();
+    }
+    catch (error) {
+        next(error);
     }
 });
